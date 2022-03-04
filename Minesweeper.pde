@@ -2,6 +2,7 @@ import de.bezier.guido.*;
 private static final int NUM_ROWS = 20;
 private static final int NUM_COLS = 20;
 int numFlags = 40;
+boolean ended = false;
 
 private MSButton[][] buttons; //2d array of minesweeper buttons
 private ArrayList <MSButton> mines = new ArrayList <MSButton>(); //ArrayList of just the minesweeper buttons that are mined
@@ -50,6 +51,28 @@ public void draw ()
     textAlign(CENTER, CENTER);
     text("You have " + numFlags + " flags left!", 300, 620);
 }
+
+public void keyPressed(){
+  if (keyCode == 32){
+    mines.clear();
+    for (int i = 0; i < 40; i++){
+      setMines();
+    }
+    for (int r = 0; r < NUM_ROWS; r++){
+      for (int c = 0; c < NUM_COLS; c++){
+        buttons[r][c].flagged = false;
+        buttons[r][c].clicked = false;
+        buttons[r][c].myLabel = "";
+        buttons[r][c].myColor = color(0, 0, 0);
+        buttons[r][c].size = 15;
+        buttons[r][c].click = false;
+    }
+  }
+    numFlags = 40;
+    ended = false;
+  }
+}
+
 public boolean isWon()
 {
     for (int i = 0; i < mines.size(); i++){
@@ -77,6 +100,7 @@ public void displayLosingMessage()
      mines.get(i).clicked = true;
      mines.get(i).draw();
    }
+   ended = true;
 }
 public void displayWinningMessage()
 {
@@ -91,7 +115,7 @@ public void displayWinningMessage()
    buttons[9][11].setLabel("W");
    buttons[9][12].setLabel("I");
    buttons[9][13].setLabel("N");
-   
+   ended = true;
 }
 public boolean isValid(int r, int c)
 {
@@ -144,23 +168,25 @@ public class MSButton
     // called by manager
     public void mousePressed () 
     {
+      if (ended == false){
       clicked = true;
-        if (mouseButton == RIGHT && click == false){
+      }
+        if (mouseButton == RIGHT && click == false && ended == false){
         flagged = !flagged;
-          if (flagged == false){
+          if (flagged == false && ended == false){
             clicked = false;
             numFlags += 1;
-          } else if (flagged == true && numFlags !=0){
+          } else if (flagged == true && numFlags !=0 && ended == false){
             numFlags -=1;
-          } else if (numFlags == 0) {
+          } else if (numFlags == 0 && ended == false) {
             flagged = !flagged;
             clicked = false;
           }
-        } else if (!flagged && mines.contains(buttons[myRow][myCol])){
+        } else if (!flagged && mines.contains(buttons[myRow][myCol]) && ended == false){
           displayLosingMessage();
-        } else if (!flagged && countMines(myRow, myCol) > 0){
+        } else if (!flagged && countMines(myRow, myCol) > 0 && ended == false){
           setLabel(countMines(myRow, myCol));
-        } else if (!flagged) {
+        } else if (!flagged && ended == false) {
           for (int r = myRow - 1; r <= myRow + 1; r++){
             for (int c = myCol - 1; c <= myCol + 1; c++){
               if (isValid(r, c) && buttons[r][c].clicked == false){
